@@ -1,7 +1,7 @@
 /**
  * @fileoverview Implements a VM for the conceptual Stack8 CPU
  * @author Florian Stolz
- * @version 0.1.0
+ * @version 0.2.0
 */
 
 /**
@@ -9,14 +9,59 @@
  */
 class CPU
 {
-    constructor()
+    constructor(memory,alu,stack)
     {
-        ;
+        this.pc = 0;
+        this.memory = memory;
+        this.internalALU = alu;
+        this.internalStack = stack;
     }
 
     step()
     {
-        ;
+        var instruction = 0;
+        var opcode = 0;
+
+        instruction = this.memory.fetch(this.pc);
+        instruction = instruction << 8;
+        this.pc++;
+        instruction = instruction | this.memory.fetch(this.pc);
+        this.pc++;
+        opcode = instruction >> 13;
+        switch(opcode)
+        {
+            case 0:
+                this.internalStack.push(this.memory.fetch((instruction & 0x1FFF)));
+                break;
+            case 1:
+                this.memory.store((instruction & 0x1FFF),this.internalStack.pop());
+                break;
+            case 2:
+                console.log("Yet unimplemented. Skipping...");
+                break;
+            case 3:
+                console.log("Yet unimplemented. Skipping...");
+                break;
+            case 4:
+                this.internalALU.performOperation(1);
+                break;
+            case 5:
+                this.internalALU.performOperation(2);
+                break;
+            case 6:
+                this.internalALU.performOperation(3);
+                break;
+            case 7:
+                this.internalALU.performOperation(4);
+                if(this.internalStack.pop() == 1)
+                {
+                    this.pc = (instruction & 0x1FFF);
+                }
+                break;
+            default:
+                console.log("Unknown instruction "+ opcode +". Stopping...");
+                return;
+        }
     }
 
     run()
@@ -24,6 +69,7 @@ class CPU
         ;
     }
 }
+
 /**
  * Represents the internal ALU of the CPU
  */
@@ -59,6 +105,18 @@ class ALU
         return tempReg;
     }
 
+    performCmp(inval1, inval2)
+    {
+        if(inval1 <= inval2)
+        {
+            return 1;
+        }
+        else
+        {
+            return 0;
+        }
+    }
+
     performOperation(opcode)
     {
         if(!(opcode > -1 && opcode < 8))
@@ -83,6 +141,11 @@ class ALU
             this.aluOutReg = this.performLfsh(this.aluInReg1,this.aluInReg2);
             this.internalStack.push(this.aluOutReg);
         }
+        if(opcode == 4)
+        {
+            this.aluOutReg = this.performCmp(this.aluInReg1,this.aluInReg2);
+            this.internalStack.push(this.aluOutReg);
+        }
     }
 }
 
@@ -105,11 +168,6 @@ class Memory
     {
         this.memArr[address] = value;
     }
-
-    get memArr()
-    {
-        return this.memArr;
-    }
 }
 
 /**
@@ -119,7 +177,7 @@ class Stack
 {
     constructor()
     {
-        this.stackObject = new Int8Array();
+        this.stackObject = new Int8Array(8);
         this.currentLength = 0;
     }
 
@@ -145,15 +203,6 @@ class Stack
         this.currentLength--;
 
         return poppedValue;
-    }
-
-    inspect()
-    {
-        console.log("Inspecting Stack:");
-        for(var i = 0; i < this.stackObject.length; i++)
-        {
-            console.log(this.stackObject[i]);
-        }
     }
 
 }
