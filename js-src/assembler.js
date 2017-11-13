@@ -1,7 +1,7 @@
 /**
  * @fileoverview Implements an basic assembler for the Stack8 CPU
  * @author Florian Stolz
- * @version 0.1.0
+ * @version 0.1.1
 */
 
 /**
@@ -38,8 +38,8 @@ class Assembler
         }
         */
 
-        var instruction;
         address = 0;
+        var instruction;
         var linesplit;
         var argumentFlag = 0;
         var dataFlag = 0;
@@ -55,7 +55,7 @@ class Assembler
                 continue;
             }
 
-            linesplit = inputlines[i].toLowerCase().split(' ');
+            linesplit = inputlines[i].toLowerCase().match(/\b(\w+)\b/g);
             switch(linesplit[0])
             {
                 case "push":
@@ -70,7 +70,7 @@ class Assembler
                     break;
                 case "db":
                     //console.log("Caught DB!");
-                    instruction = instruction | 0;
+                    //instruction = instruction | 0;
                     dataFlag = 1;
                     argumentFlag = 1;
                     break;
@@ -88,7 +88,7 @@ class Assembler
                     dataFlag = 0;
                     argumentFlag = 0;
                     break;
-                case "lshift":
+                case "lshft":
                     //console.log("Caught LeftShift!");
                     instruction = instruction | 6;
                     instruction = instruction << 13;
@@ -108,31 +108,58 @@ class Assembler
 
             if(argumentFlag > 0)
             {
-                if(linesplit[1] == "undefined")
+                if(!linesplit[1])
                 {
                     console.log("No valid argument found. Stopping...");
+                    return;
                 }
 
                 if(dataFlag == 0)
                 {
-                    if(labels[linesplit[1].toLowerCase()] == "undefined")
+                    if(!labels[linesplit[1].toLowerCase()])
                     {
                         console.log("No valid label found. Stopping...");
+                        return;
                     }
                     instruction = instruction << 13;
                     instruction = instruction | labels[linesplit[1].toLowerCase()];
                 }
                 else
                 {
-                    instruction = instruction | parseInt(linesplit[1],10);
-                    instruction = instruction << 8;
+                    var argumentIndex = inputlines[i].indexOf(linesplit[1]);
+                    var dataString = inputlines[i].substring(argumentIndex);
+                    var argumentSplit = dataString.split(",");
+                    var argument = 0;
+                    for(var j = 0; j < argumentSplit.length; j++)
+                    {
+                        if( (argument = argumentSplit[j].replace(/[ \t]/g, '').match(/^\d+$/g)) )
+                        {
+                            memory.store(address,argument);
+                            address++;
+                        }
+                        else
+                        {
+                            console.log("Invalid argument. Stopping");
+                            return;
+                        }
+                    }
+                    if((argumentSplit.length % 2) != 0)
+                    {
+                        memory.store(address,0);
+                        address++;
+                    }
+                    //instruction = instruction | parseInt(linesplit[1],10);
+                    //instruction = instruction << 8;
                 }
             }
 
-            memory.store(address,instruction >> 8);
-            address++;
-            memory.store(address,instruction & 0xFF);
-            address++;
+            if(dataFlag == 0)
+            { 
+                memory.store(address,instruction >> 8);
+                address++;
+                memory.store(address,instruction & 0xFF);
+                address++;
+            }
         }
     }
 
