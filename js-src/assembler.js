@@ -1,7 +1,7 @@
 /**
  * @fileoverview Implements an basic assembler for the Stack8 CPU
  * @author Florian Stolz
- * @version 0.1.1
+ * @version 0.1.2
 */
 
 /**
@@ -55,7 +55,7 @@ class Assembler
                 continue;
             }
 
-            linesplit = inputlines[i].toLowerCase().match(/\b(\w+)\b/g);
+            linesplit = inputlines[i].toLowerCase().match(/(\b(\w+)\b|#\d+)/g); //\b(\w+)\b
             switch(linesplit[0])
             {
                 case "push":
@@ -118,11 +118,32 @@ class Assembler
                 {
                     if(!labels[linesplit[1].toLowerCase()])
                     {
-                        console.log("No valid label found. Stopping...");
-                        return;
+                        
+                        if(linesplit[1].indexOf("#") == 0)
+                        {
+                            var argumentAddress = linesplit[1].substring(1).replace(/[ \t]/g, '').match(/^\d+$/g);
+                            if(!argumentAddress)
+                            {
+                                console.log("No valid argument found. Stopping...");
+                                return;
+                            }
+                            instruction = instruction << 13;
+                            instruction = instruction | (parseInt(argumentAddress) % 8192);
+                        }
+                        else
+                        {
+                            console.log("No valid label/address found. Stopping...");
+                            return;
+                        }
+
+                        //console.log("No valid label found. Stopping...");
+                        //return;
                     }
-                    instruction = instruction << 13;
-                    instruction = instruction | labels[linesplit[1].toLowerCase()];
+                    else
+                    {
+                        instruction = instruction << 13;
+                        instruction = instruction | labels[linesplit[1].toLowerCase()];
+                    }
                 }
                 else
                 {
@@ -130,8 +151,14 @@ class Assembler
                     var dataString = inputlines[i].substring(argumentIndex);
                     var argumentSplit = dataString.split(",");
                     var argument = 0;
-                    for(var j = 0; j < argumentSplit.length; j++)
+                    for(var j = 0; j < 2; j++) //artificial limitation, to make label resolve not so complicated for now
                     {
+                        if(!argumentSplit[j])
+                        {
+                            memory.store(address,0);
+                            address++;
+                            continue;
+                        }
                         if( (argument = argumentSplit[j].replace(/[ \t]/g, '').match(/^\d+$/g)) )
                         {
                             memory.store(address,argument);
@@ -143,11 +170,13 @@ class Assembler
                             return;
                         }
                     }
+                    /*
                     if((argumentSplit.length % 2) != 0)
                     {
                         memory.store(address,0);
                         address++;
                     }
+                    */
                     //instruction = instruction | parseInt(linesplit[1],10);
                     //instruction = instruction << 8;
                 }
