@@ -37,26 +37,26 @@ class CPU
                 this.memory.store((instruction & 0x1FFF),this.internalStack.pop());
                 break;
             case 2:
-                console.log("Pushi");
+                //console.log("Pushi");
                 var pointer = 0;
                 var memoryLocation = instruction & 0x1FFF;
                 pointer = pointer | this.memory.fetch(memoryLocation);
                 pointer = pointer << 8;
                 memoryLocation++;
                 pointer = pointer | this.memory.fetch(memoryLocation);
-                console.log("Indirect: " + pointer);
+                //console.log("Indirect: " + pointer);
                 this.internalStack.push(this.memory.fetch(pointer));
                 //this.internalStack.push(this.memory.fetch(this.memory.fetch(instruction & 0x1FFF)));
                 break;
             case 3:
-                console.log("Popi");
+                //console.log("Popi");
                 var pointer = 0;
                 var memoryLocation = instruction & 0x1FFF;
                 pointer = pointer | this.memory.fetch(memoryLocation);
                 pointer = pointer << 8;
                 memoryLocation++;
                 pointer = pointer | this.memory.fetch(memoryLocation);
-                console.log("Indirect: " + pointer);
+                //console.log("Indirect: " + pointer);
                 this.memory.store(pointer,this.internalStack.pop());
                 //this.internalStack.push(this.memory.fetch(this.memory.fetch(instruction & 0x1FFF)));
                 break;
