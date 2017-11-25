@@ -4,24 +4,6 @@
  * @version 0.1.3
 */
 
-class Memory
-{
-    constructor()
-    {
-        this.memArr = new Uint8Array(8192);
-    }
-
-    fetch(address)
-    {
-        return this.memArr[address];
-    }
-
-    store(address, value)
-    {
-        this.memArr[address] = value;
-    }
-}
-
 /**
  * Implements the assembler functionialities
  */
@@ -217,7 +199,7 @@ class Assembler
                         }
                         if( (argument = argumentSplit[0].replace(/[ \t]/g, '').match(/^\d+$/g)) )
                         {
-                            argument = argument % 8191;
+                            argument = argument & 8191;
                             memory.store(address,(argument >> 8));
                             address++;
                             memory.store(address,(argument & 0xFF));
