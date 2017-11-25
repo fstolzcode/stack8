@@ -1,8 +1,26 @@
 /**
  * @fileoverview Implements an basic assembler for the Stack8 CPU
  * @author Florian Stolz
- * @version 0.1.2
+ * @version 0.1.3
 */
+
+class Memory
+{
+    constructor()
+    {
+        this.memArr = new Uint8Array(8192);
+    }
+
+    fetch(address)
+    {
+        return this.memArr[address];
+    }
+
+    store(address, value)
+    {
+        this.memArr[address] = value;
+    }
+}
 
 /**
  * Implements the assembler functionialities
@@ -43,12 +61,14 @@ class Assembler
         var linesplit;
         var argumentFlag = 0;
         var dataFlag = 0;
+        var pointerFlag = 0;
 
         for(var i = 0; i < inputlines.length; i++)
         {
             instruction = 0;
             argumentFlag = 0;
             dataFlag = 0;
+            pointerFlag = 0;
 
             if(inputlines[i].indexOf(":") >= 0 || inputlines[i] === "")
             {
@@ -67,6 +87,19 @@ class Assembler
                     //console.log("Caught Pop!");
                     instruction = instruction | 1;
                     argumentFlag = 1;
+                    break;
+                case "pushi":
+                    instruction = instruction | 2;
+                    argumentFlag = 1;
+                    break;
+                case "popi":
+                    instruction = instruction | 3;
+                    argumentFlag = 1;
+                    break;
+                case "dp":
+                    dataFlag = 1;
+                    argumentFlag = 1;
+                    pointerFlag = 1;
                     break;
                 case "db":
                     //console.log("Caught DB!");
@@ -151,23 +184,44 @@ class Assembler
                     var dataString = inputlines[i].substring(argumentIndex);
                     var argumentSplit = dataString.split(",");
                     var argument = 0;
-                    for(var j = 0; j < 2; j++) //artificial limitation, to make label resolve not so complicated for now
+                    if(pointerFlag == 0)
                     {
-                        if(!argumentSplit[j])
+                        for(var j = 0; j < 2; j++) //artificial limitation, to make label resolve not so complicated for now
+                        {
+                            if(!argumentSplit[j])
+                            {
+                                memory.store(address,0);
+                                address++;
+                                continue;
+                            }
+                            if( (argument = argumentSplit[j].replace(/[ \t]/g, '').match(/^\d+$/g)) )
+                            {
+                                memory.store(address,argument);
+                                address++;
+                            }
+                            else
+                            {
+                                console.log("Invalid argument. Stopping");
+                                return;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        if(!argumentSplit[0])
                         {
                             memory.store(address,0);
                             address++;
-                            continue;
-                        }
-                        if( (argument = argumentSplit[j].replace(/[ \t]/g, '').match(/^\d+$/g)) )
-                        {
-                            memory.store(address,argument);
+                            memory.store(address,0);
                             address++;
                         }
-                        else
+                        if( (argument = argumentSplit[0].replace(/[ \t]/g, '').match(/^\d+$/g)) )
                         {
-                            console.log("Invalid argument. Stopping");
-                            return;
+                            argument = argument % 8191;
+                            memory.store(address,(argument >> 8));
+                            address++;
+                            memory.store(address,(argument & 0xFF));
+                            address++;
                         }
                     }
                     /*
@@ -184,16 +238,11 @@ class Assembler
 
             if(dataFlag == 0)
             { 
-                memory.store(address,instruction >> 8);
+                memory.store(address,( ( (instruction >> 8) & 0xFF) ) );
                 address++;
-                memory.store(address,instruction & 0xFF);
+                memory.store(address, (instruction & 0xFF));
                 address++;
             }
         }
-    }
-
-    disassemble()
-    {
-        ;
     }
 }
