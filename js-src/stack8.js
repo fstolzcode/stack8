@@ -1,7 +1,7 @@
 /**
  * @fileoverview Implements a VM for the conceptual Stack8 CPU
  * @author Florian Stolz
- * @version 0.2.1
+ * @version 0.2.2
 */
 
 /**
@@ -44,6 +44,7 @@ class CPU
                 pointer = pointer << 8;
                 memoryLocation++;
                 pointer = pointer | this.memory.fetch(memoryLocation);
+                pointer = pointer & 8191;
                 //console.log("Indirect: " + pointer);
                 this.internalStack.push(this.memory.fetch(pointer));
                 //this.internalStack.push(this.memory.fetch(this.memory.fetch(instruction & 0x1FFF)));
@@ -56,6 +57,7 @@ class CPU
                 pointer = pointer << 8;
                 memoryLocation++;
                 pointer = pointer | this.memory.fetch(memoryLocation);
+                pointer = pointer & 8191;
                 //console.log("Indirect: " + pointer);
                 this.memory.store(pointer,this.internalStack.pop());
                 //this.internalStack.push(this.memory.fetch(this.memory.fetch(instruction & 0x1FFF)));

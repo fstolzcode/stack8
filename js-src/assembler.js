@@ -1,7 +1,7 @@
 /**
  * @fileoverview Implements an basic assembler for the Stack8 CPU
  * @author Florian Stolz
- * @version 0.1.3
+ * @version 0.1.4
 */
 
 /**
@@ -57,7 +57,7 @@ class Assembler
                 continue;
             }
 
-            linesplit = inputlines[i].toLowerCase().match(/(\b(\w+)\b|#\d+)/g); //\b(\w+)\b
+            linesplit = inputlines[i].toLowerCase().match(/(\b(\w+)(\+[0-9]+)?\b|#\d+)/g); //\b(\w+)\b //(\b(\w+)\b|#\d+)
             switch(linesplit[0])
             {
                 case "push":
@@ -117,21 +117,41 @@ class Assembler
                     argumentFlag = 1;
                     break;
                 default:
-                    console.log("Unknown instruction. Stopping...");
-                    return;
+                    //console.log("Unknown instruction. Stopping...");
+                    return "Line "+(i+1)+": Unknown instruction \""+linesplit[0]+"\"";
+                    //return;
             }
 
             if(argumentFlag > 0)
             {
                 if(!linesplit[1])
                 {
-                    console.log("No valid argument found. Stopping...");
-                    return;
+                    //console.log("No valid argument found. Stopping...");
+                    return "Line "+(i+1)+": No valid argument found";
+                    //return;
                 }
 
                 if(dataFlag == 0)
                 {
-                    if(!labels[linesplit[1].toLowerCase()])
+                    if(linesplit[1].indexOf("+") > 0)
+                    {
+                        var baseLabel = linesplit[1].split("+")[0];
+                        //console.log("BaseLabel: "+baseLabel);
+                        var baseOffset = linesplit[1].split("+")[1];
+                        //console.log("Offset: "+baseOffset);
+                        if(labels[baseLabel.toLowerCase()] != null)
+                        {
+                            //console.log(labels[baseLabel.toLowerCase()]);
+                            //console.log((labels[baseLabel.toLowerCase()] + baseOffset));
+                            instruction = instruction << 13;
+                            instruction = instruction | ( ( parseInt(labels[baseLabel.toLowerCase()]) + parseInt(baseOffset)) % 8191);
+                        }
+                        else
+                        {
+                            return "Line "+(i+1)+": No valid label found"; 
+                        }
+                    }
+                    else if(labels[linesplit[1].toLowerCase()] == null)
                     {
                         
                         if(linesplit[1].indexOf("#") == 0)
@@ -139,15 +159,17 @@ class Assembler
                             var argumentAddress = linesplit[1].substring(1).replace(/[ \t]/g, '').match(/^\d+$/g);
                             if(!argumentAddress)
                             {
-                                console.log("No valid argument found. Stopping...");
-                                return;
+                                //console.log("No valid argument found. Stopping...");
+                                return "Line "+(i+1)+": No valid argument found";
+                                //return;
                             }
                             instruction = instruction << 13;
                             instruction = instruction | (parseInt(argumentAddress) % 8192);
                         }
                         else
                         {
-                            console.log("No valid label/address found. Stopping...");
+                            //console.log("No valid label/address found. Stopping...");
+                            return "Line "+(i+1)+": No valid label/address found";
                             return;
                         }
 
@@ -157,7 +179,7 @@ class Assembler
                     else
                     {
                         instruction = instruction << 13;
-                        instruction = instruction | labels[linesplit[1].toLowerCase()];
+                        instruction = instruction | parseInt(labels[linesplit[1].toLowerCase()]);
                     }
                 }
                 else
@@ -183,8 +205,9 @@ class Assembler
                             }
                             else
                             {
-                                console.log("Invalid argument. Stopping");
-                                return;
+                                //console.log("Invalid argument. Stopping");
+                                return "Line "+(i+1)+": Invalid argument";
+                                //return;
                             }
                         }
                     }
@@ -226,5 +249,6 @@ class Assembler
                 address++;
             }
         }
+        return "Success";
     }
 }
