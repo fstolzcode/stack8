@@ -1,7 +1,7 @@
 /**
  * @fileoverview Implements an basic assembler for the Stack8 CPU
  * @author Florian Stolz
- * @version 0.1.4
+ * @version 0.1.5
 */
 
 /**
@@ -103,12 +103,12 @@ class Assembler
                     dataFlag = 0;
                     argumentFlag = 0;
                     break;
-                case "lshft":
+                case "jmpule":
                     //console.log("Caught LeftShift!");
                     instruction = instruction | 6;
-                    instruction = instruction << 13;
+                    //instruction = instruction << 13;
                     dataFlag = 0;
-                    argumentFlag = 0;
+                    argumentFlag = 1;
                     break;
                 case "jmple":
                     //console.log("Caught JUMPLE!");
@@ -170,7 +170,7 @@ class Assembler
                         {
                             //console.log("No valid label/address found. Stopping...");
                             return "Line "+(i+1)+": No valid label/address found";
-                            return;
+                            //return;
                         }
 
                         //console.log("No valid label found. Stopping...");

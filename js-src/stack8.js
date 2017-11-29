@@ -1,7 +1,7 @@
 /**
  * @fileoverview Implements a VM for the conceptual Stack8 CPU
  * @author Florian Stolz
- * @version 0.2.2
+ * @version 0.2.3
 */
 
 /**
@@ -70,6 +70,10 @@ class CPU
                 break;
             case 6:
                 this.internalALU.performOperation(3);
+                if(this.internalStack.pop() == 1)
+                {
+                    this.pc = (instruction & 0x1FFF);
+                }
                 break;
             case 7:
                 this.internalALU.performOperation(4);
@@ -125,6 +129,20 @@ class ALU
         return tempReg;
     }
 
+    performUCmp(inval1, inval2)
+    {
+        var uInval1 = (new Uint32Array([inval1]))[0];
+        var uInval2 = (new Uint32Array([inval2]))[0];
+        if(uInval1 <= uInval2)
+        {
+            return 1;
+        }
+        else
+        {
+            return 0;
+        }
+    }
+
     performCmp(inval1, inval2)
     {
         if(inval1 <= inval2)
@@ -158,7 +176,11 @@ class ALU
         }
         if(opcode == 3)
         {
+            /*
             this.aluOutReg = this.performLfsh(this.aluInReg1,this.aluInReg2);
+            this.internalStack.push(this.aluOutReg);
+            */
+            this.aluOutReg = this.performUCmp(this.aluInReg1,this.aluInReg2);
             this.internalStack.push(this.aluOutReg);
         }
         if(opcode == 4)
