@@ -1,0 +1,25 @@
+<html>
+<head>
+</head>
+<body>
+<script>
+function submit()
+{
+return;
+var name = document.getElementById("name").value;
+var input = document.getElementById("testArea").value;
+var request = new XMLHttpRequest();
+request.open("POST","ajax.php",false);
+request.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+var requestContent = "program="+input+"&name="+name;
+request.send(requestContent);
+alert(request.responseText);
+}
+</script>
+Name:<br>
+<input type="text" id="name"><br>
+Input:<br>
+<textarea id="testArea"></textarea><br>
+<button type="submit" onclick="submit();">Submit</button>
+</body>
+</html>
