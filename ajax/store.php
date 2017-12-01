@@ -1,11 +1,12 @@
 <?php
-if(!isset($_POST["program"]) || !isset($_POST["name"]))
+session_start();
+if(!isset($_POST["program"]) || !isset($_POST["name"]) || !isset($_POST["private"]))
 {
 	echo "Error with parameters";
 	exit(-1);
 }
 
-if(empty(trim($_POST["program"])) || empty(trim($_POST["name"])))
+if(empty(trim($_POST["program"])) || empty(trim($_POST["name"])) || !is_numeric($_POST["private"]))
 {
 	echo "Error with parameters";
 	exit(-1);
@@ -15,10 +16,26 @@ if(count(explode("\n", $_POST["program"])) > 8181 || strlen($_POST["program"]) >
 	echo "Program too large";
 	exit(-1);
 }
+
+if(intval($_POST["private"]) == 1 && isset($_SESSION["uid"]) && isset($_SESSION["CREATED"]))
+{
+    if( (time() - $_SESSION["CREATED"]) > 3600 )
+    {
+        //Session too old
+        session_unset();
+        session_destroy();
+		die("Your session expired");
+    }
+}
+else if(intval($_POST["private"]) == 1)
+{
+	die("You have to log in");
+}
+//die("1");
 //var_dump($_POST);
 
 $dbserver = "localhost";
-$dbuser = "xxxx";
+$dbuser = "xxxxr";
 $dbpassword = "xxxx";
 $dbname = "stack8";
 
@@ -31,7 +48,7 @@ if ($db->connect_error)
 	exit(-1);
 }
 
-$query = $db->prepare("INSERT IGNORE INTO Programs (uid,pname,phash) VALUES (?,?,?)");
+$query = $db->prepare("INSERT IGNORE INTO Programs (uid,pname,phash,public) VALUES (?,?,?,?)");
 if(!$query)
 {
 	echo "Error: ". $db->errno . " ". $db->error;
@@ -39,15 +56,20 @@ if(!$query)
 }
 
 $uid = 0;
+if(isset($_SESSION["uid"]))
+{
+	$uid = intval($_SESSION["uid"]);
+}
 $pname = $_POST["name"];
 $pname = htmlspecialchars($pname);
 $phash = substr(hash("whirlpool",$pname),0,32);
+$sharePublic = 1 - intval($_POST["private"],10);
 //echo $pname;
 //echo $_POST["program"];
 //exit(0);
 //echo "pname: ". $pname ." phash: ". $phash ." ";
 
-if(!$query->bind_param("iss",$uid,$pname,$phash))
+if(!$query->bind_param("issi",$uid,$pname,$phash,$sharePublic))
 {
 	echo "Error: ". $query->errno . " ". $query->error;
 	exit(-1);

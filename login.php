@@ -1,3 +1,20 @@
+<?php
+session_start();
+if(isset($_SESSION["uid"]) && isset($_SESSION["CREATED"]))
+{
+    if( (time() - $_SESSION["CREATED"]) > 3600 )
+    {
+        //Session too old
+        session_unset();
+        session_destroy();
+    }
+    else
+    {
+        echo "Already logged in";
+        die();
+    }
+}
+?>
 <!DOCTYPE html>
 <html>
 <head>
@@ -28,46 +45,32 @@
   </div>
 </nav>
 
-<div class="container">
-	<div class="row">
-	<br>
-	</div>
-	<div class="row">
-		<div class="col">
-		<ul class="list-group">
-		<?php
-		$dbserver = "localhost";
-		$dbuser = "xxxx";
-		$dbpassword = "xxxx";
-		$dbname = "stack8";
-
-		// Create connection
-		$db = new mysqli($dbserver, $dbuser, $dbpassword, $dbname);
-
-		if ($db->connect_error)
-		{
-        	echo "Error with DB conection";
-        	exit(-1);
-		}
-
-		$list = $db->query("SELECT pname,phash,public FROM Programs");
-
-		if($list->num_rows > 0 )
-		{
-        	while($row = $list->fetch_assoc())
-        	{
-				if(intval($row["public"],10) === 1)
-				{
-                	echo "<a href=\"style.html?phash=".$row["phash"]."\" class=\"list-group-item list-group-item-action text-center d-inline-block \">".$row["pname"]."</a>";
-        		}
-			}
-		}
-
-		$db->close();
-		?>
-
-		</ul>
-		</div>
+<div class="container">	
+	<div class="row p-2" >
+  		<div class="col-sm-6">
+    		<div class="card">
+      			<div class="card-block">
+        			<h3 class="card-title">Log in...</h3>
+					 <form action="dologin.php" method="post">
+        			 Name: <input type="text" name="username" class="form-control" placeholder="Your username"><br>
+        			 Password: <input type="password" name="password" class="form-control"><br>
+        			<button type="submit" class="btn btn-primary">Login</button>
+        			</form>
+      			</div>
+    		</div>
+  		</div>
+  		<div class="col-sm-6">
+    		<div class="card">
+      			<div class="card-block">
+        		<h3 class="card-title">... or register</h3>
+				<form action="doregister.php" method="post">
+                Name: <input type="text" name="username" class="form-control" placeholder="Your username"><br>
+                Password: <input type="password" name="password" class="form-control"><br>
+                <button type="submit" class="btn btn-success">Register</button>
+                </form>
+      			</div>
+    		</div>
+  		</div>
 	</div>
 </div>
 
