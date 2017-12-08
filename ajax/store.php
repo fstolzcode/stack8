@@ -1,5 +1,7 @@
 <?php
+//Session handler
 session_start();
+//check parameters
 if(!isset($_POST["program"]) || !isset($_POST["name"]) || !isset($_POST["private"]))
 {
 	echo "Error with parameters";
@@ -17,6 +19,7 @@ if(count(explode("\n", $_POST["program"])) > 8181 || strlen($_POST["program"]) >
 	exit(-1);
 }
 
+//check if we are actually logged in when sharing privately
 if(intval($_POST["private"]) == 1 && isset($_SESSION["uid"]) && isset($_SESSION["CREATED"]))
 {
     if( (time() - $_SESSION["CREATED"]) > 3600 )
@@ -34,9 +37,10 @@ else if(intval($_POST["private"]) == 1)
 //die("1");
 //var_dump($_POST);
 
+//DB data
 $dbserver = "localhost";
-$dbuser = "xxxxr";
-$dbpassword = "xxxx";
+$dbuser = "stackUser";
+$dbpassword = "xxxxx";
 $dbname = "stack8";
 
 // Create connection
@@ -48,6 +52,7 @@ if ($db->connect_error)
 	exit(-1);
 }
 
+//Insert only, if program name is unique
 $query = $db->prepare("INSERT IGNORE INTO Programs (uid,pname,phash,public) VALUES (?,?,?,?)");
 if(!$query)
 {
@@ -55,6 +60,7 @@ if(!$query)
 	exit(-1);
 }
 
+//Get UID, UID = 0 is anonymous
 $uid = 0;
 if(isset($_SESSION["uid"]))
 {
@@ -62,7 +68,7 @@ if(isset($_SESSION["uid"]))
 }
 $pname = $_POST["name"];
 $pname = htmlspecialchars($pname);
-$phash = substr(hash("whirlpool",$pname),0,32);
+$phash = substr(hash("whirlpool",$pname),0,32); //truncated hash
 $sharePublic = 1 - intval($_POST["private"],10);
 //echo $pname;
 //echo $_POST["program"];
@@ -87,6 +93,7 @@ if($query->affected_rows == 0)
 
 $db->close();
 //echo 1;
+//write the file
 $filepath = "/var/www/html/programs/".$phash;
 $myfile = fopen($filepath,"w") or die(print_r(error_get_last(),true));
 fwrite($myfile,$_POST["program"]);

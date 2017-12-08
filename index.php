@@ -1,4 +1,5 @@
 <?php
+//Session handler
 session_start();
 $canShare = false;
 if(isset($_SESSION["uid"]) && isset($_SESSION["CREATED"]))
@@ -16,7 +17,7 @@ if(isset($_SESSION["uid"]) && isset($_SESSION["CREATED"]))
 }
 ?>
 <!DOCTYPE html>
-<html leng="en">
+<html lang="en">
 <head>
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css" integrity="sha384-rwoIResjU2yc3z8GV/NPeZWAv56rSmLldC3R/AZzGRnGxQQKnKkoFVhFQhNUwEyJ" crossorigin="anonymous">
 <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
@@ -38,26 +39,26 @@ if(isset($_SESSION["uid"]) && isset($_SESSION["CREATED"]))
 	.col-3
 	{
 	}
-
 	.mem-0
 	{
 		background: #eeeeee;
 	}
-
 	.mem-1
 	{
 		background: #dddddd;
 	}
 </style>
-
-<script type="text/javascript" src="stack8.js"></script>
-<script type="text/javascript" src="assembler.js"></script>
+<!-- Sources -->
+<script type="text/javascript" src="js-src/stack8.js"></script>
+<script type="text/javascript" src="js-src/assembler.js"></script>
 
 <link href="jquery.numberedtextarea.css" rel="stylesheet" type="text/css">
 
 </head>
+<!-- Init page -->
 <body onload="pageInit();">
 
+<!-- Init VM -->
 <script>
 var testMemory = new Memory();
 var testAssembler = new Assembler();
@@ -67,6 +68,7 @@ var testCPU = new CPU(testMemory,testALU,testStack);
 var runState = 0;
 </script>
 
+<!-- Navbar -->
 <nav class="navbar navbar-toggleable-md navbar-light bg-faded">
   <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
     <span class="navbar-toggler-icon"></span>
@@ -78,23 +80,23 @@ var runState = 0;
         <a class="nav-link" href="#">Home</a>
       </li>
       <li class="nav-item">
-        <a class="nav-link disabled" href="#">Manual</a>
+        <a class="nav-link" href="howto.php">Manual</a>
       </li>
       <li class="nav-item">
         <a class="nav-link" href="community.php">Shared Programs</a>
       </li>
       <li class="nav-item">
-        <a class="nav-link disabled" href="#">My Stack</a>
+        <a class="nav-link" href="mystack.php">My Stack</a>
       </li>
     </ul>
   </div>
 </nav>
 
 <div class="container">
-	<div class="row">
+	<div class="row p-2">
 	<br>
 	</div>
-
+	<!-- Code Area, Memory Area empty, filled by Javascript -->
 	<div class="row d-flex align-items-stretch">
 
 		<div class="col-md-5 col-1 flex-wrap">
@@ -106,7 +108,7 @@ var runState = 0;
     		<a class="nav-link" href="#memory" role="tab" data-toggle="tab"><i class="fa fa-list" aria-hidden="true"></i> Memory</a>
   			</li>
 		</ul>
-
+		<!-- Control buttons -->
 		<div class="tab-content">
   		<div role="tabpanel" class="tab-pane active text-center" id="code">
   			<form class="text-center">
@@ -131,7 +133,7 @@ var runState = 0;
 		<button type="button" class="btn btn-outline-success" data-toggle="modal" data-target="#shareModal"><i class="fa fa-share-alt" aria-hidden="true"></i> Share</button>
 		</div>
 		</div>
-
+		<!-- Screen and Debugger, filled by Javascript -->
 		<div class="col-md-5 col-3">
 		<ul class="nav nav-tabs" role="tablist">
   			<li class="nav-item">
@@ -165,8 +167,6 @@ var runState = 0;
   				<div class="col d-flex flex-column align-items-stretch text-center">
   				<div class="p-1">Program Counter</div>
   				<div class="p-0" id="pc" style="background:#eeeeee;">?</div>
-  				<div class="p-1">Jump Flag</div>
-  				<div class="p-0" style="background:#eeeeee;">Not implemented</div>
   				</div>
   			</div>
   		</div>
@@ -174,6 +174,7 @@ var runState = 0;
 	</div>
 </div>
 
+<!-- Share screen -->
 <div class="modal fade" id="shareModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
@@ -214,11 +215,13 @@ var runState = 0;
   </div>
 </div>
 
+<!-- Some includes -->
 <script src="https://code.jquery.com/jquery-3.1.1.slim.min.js" integrity="sha384-A7FZj7v+d/sdmMqp/nOQwliLvUsJfDHW+k9Omg/a/EheAdgtzNs3hpfag6Ed950n" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js" integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb" crossorigin="anonymous"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js" integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn" crossorigin="anonymous"></script>
 
 
+<!-- Share Functions -->
 <script>
 $('#shareModal').on('hidden.bs.modal', function (e) {
   	$("#infoShareAlert").hide();
@@ -273,6 +276,7 @@ function doShare()
 	alert(request.responseText);
 }
 </script>
+<!-- Line numbers for text area -->
 <script src="jquery.numberedtextarea.js"></script>
 <script>
 $('textarea').numberedtextarea({
@@ -284,6 +288,7 @@ $('textarea').numberedtextarea({
 });
 </script>
 
+<!-- Only 8191 lines -->
 <script>
 $(document).ready(function(){
 	//https://stackoverflow.com/questions/6501043/limit-number-of-lines-in-textarea-and-display-line-count-using-jquery
@@ -303,8 +308,9 @@ $(document).ready(function(){
 });
 </script>
 
+<!-- VM functions -->
 <script>
-function memInit(memory)
+function memInit(memory) //Fill all 8191 memory cells in the debugger
 {
 	var currentDiv = document.getElementById("memLocation");
 	var mem = "";
@@ -314,7 +320,7 @@ function memInit(memory)
 		document.getElementById(mem).innerHTML = ("00"+memory.memArr[i].toString(16)).substr(-2);
 	}
 }
-function doAssemble()
+function doAssemble() //Assemble everything, clear memory before, init screen
 {
 	for(var i = 0; i < 8191; i++)
 	{
@@ -338,13 +344,12 @@ function doAssemble()
 	updatePCDebugger(testCPU.pc);
 }
 
-function updateStackDebugger(stack)
+function updateStackDebugger(stack) //Get the Stack and print it on the screen
 {
 	var element = "";
 	for(var i = 0; i < 8; i++)
 	{
 		element = "stack"+i;
-		//console.log(element+" "+stack[i]);
 		var stackelement = stack[i];
 		if(stackelement < 0)
 		{
@@ -354,26 +359,26 @@ function updateStackDebugger(stack)
 	}
 }
 
-function updatePCDebugger(pc)
+function updatePCDebugger(pc) //Get PC and print it on the screen
 {
 	document.getElementById("pc").innerHTML = ("0000"+pc.toString(16)).substr(-4);
 }
 
-function updateMemoryDebugger(location)
+function updateMemoryDebugger(location) //get memory and print it on the screen
 {
 	mem = "memLocation"+location;
 	document.getElementById(mem).innerHTML = ("00"+testMemory.memArr[location].toString(16)).substr(-2);
 }
 
-function doStep()
+function doStep() //do one step
 {
 	var CPUaction = testCPU.step();
-	if(CPUaction == -2)
+	if(CPUaction == -2) //error
 	{
 		console.log("CPU step error");
 		return;
 	}
-	if(CPUaction > -1)
+	if(CPUaction > -1) //update components if they were modified
 	{
 		updateMemoryDebugger(CPUaction);
 	}
@@ -385,11 +390,11 @@ function doStep()
 	updatePCDebugger(testCPU.pc);
 }
 
-function sleep (time) {
+function sleep (time) { //sleep function
   return new Promise((resolve) => setTimeout(resolve, time));
 }
 
-async function doRun()
+async function doRun() //Run, deactive run on second click. Waits 10ms between steps
 {
 	runState = runState ^ 1;
 	if(runState == 0)
@@ -407,7 +412,7 @@ async function doRun()
 	}
 }
 
-function drawScreen(screen,memory)
+function drawScreen(screen,memory) //Go through all the pixels, parse RRRGGGBB format, draw RGB filled rectangle
 {
 	var red = 0;
 	var green = 0;
@@ -428,7 +433,7 @@ function drawScreen(screen,memory)
 
 }
 
-function wrapperDrawScreen()
+function wrapperDrawScreen() //Wrapper
 {
 	var c = document.getElementById("myCanvas");
 	var ctx = c.getContext("2d");
@@ -439,7 +444,7 @@ function wrapperDrawScreen()
 </script>
 
 <script>
-function populateCode(){
+function populateCode(){ //If phash is set in the URL, try to get the file and put it into the codeArea
 	var getString = window.location.search.substr(1);
 	if( getString  !== "")
 	{
@@ -458,7 +463,7 @@ function populateCode(){
 	}
 }
 
-function pageInit()
+function pageInit() //Draw all memoryCells on load
 {
 	populateCode();
 	var currentDiv = document.getElementById("memoryArea");

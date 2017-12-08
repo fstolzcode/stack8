@@ -1,4 +1,23 @@
 <?php
+//Session handler
+session_start();
+if(isset($_SESSION["uid"]) && isset($_SESSION["CREATED"]))
+{
+    if( (time() - $_SESSION["CREATED"]) > 3600 )
+    {
+        //Session too old
+        session_unset();
+        session_destroy();
+    }
+    else
+    {
+		echo "Already logged in";
+		die();
+    }
+}
+?>
+<?php
+//Check Parameters
 if(!isset($_POST["username"]) || !isset($_POST["password"]))
 {
 	echo "Error with parameters";
@@ -11,10 +30,10 @@ if(empty(trim($_POST["username"])) || empty($_POST["password"]))
 	exit(-1);
 }
 
-
+//DB data
 $dbserver = "localhost";
-$dbuser = "xxxx";
-$dbpassword = "xxxx";
+$dbuser = "stackUser";
+$dbpassword = "xxxxx";
 $dbname = "stack8";
 
 // Create connection
@@ -26,6 +45,7 @@ if ($db->connect_error)
 	exit(-1);
 }
 
+//prepare Statements
 $query = $db->prepare("INSERT IGNORE INTO Users (uname,upw) VALUES (?,?)");
 if(!$query)
 {
@@ -48,12 +68,18 @@ if(!$query->execute())
 	echo "Execution error";
 	exit(-1);
 }
+
+//User already exists -> No Rows inserted
 if($query->affected_rows == 0)
 {
-	echo "No insertion";
-	exit(-1);
+	//echo "No insertion";
+	//exit(-1);
+	header("Location: mystack.php");
+	die();
 }
 
 $db->close();
+
+header("Location: mystack.php");
 
 ?>

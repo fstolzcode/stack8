@@ -1,4 +1,5 @@
 <?php
+//Session handler
 session_start();
 if(isset($_SESSION["uid"]) && isset($_SESSION["CREATED"]))
 {
@@ -26,9 +27,9 @@ if(empty(trim($_POST["username"])) || empty($_POST["password"]))
 	exit(-1);
 }
 
-
+//DB data
 $dbserver = "localhost";
-$dbuser = "xxxx";
+$dbuser = "stackUser";
 $dbpassword = "xxxx";
 $dbname = "stack8";
 
@@ -41,6 +42,7 @@ if ($db->connect_error)
 	exit(-1);
 }
 
+//prepare Statement
 $query = $db->prepare("SELECT uid, upw FROM Users WHERE uname=?");
 if(!$query)
 {
@@ -48,6 +50,7 @@ if(!$query)
 	exit(-1);
 }
 
+//escape characters
 $providedUser = htmlspecialchars($_POST["username"]);
 
 if(!$query->bind_param("s",$providedUser))
@@ -61,24 +64,29 @@ if(!$query->execute())
 	exit(-1);
 }
 
+//Check the results, if user exists and password is the same
 $result = $query->get_result();
 
 $row = $result->fetch_assoc();
 if(is_null($row))
 {
-	echo "Nothing selected";
-	exit(-1);
+	header("Location: mystack.php");
+	//echo "Nothing selected";
+	//exit(-1);
+	die();
 }
 
 if(!password_verify($_POST["password"],$row["upw"]))
 {
-	echo "Wrong password";
+	//echo "Wrong password";
+	header("Location: mystack.php");
+	die();
 }
 
 $_SESSION["uid"] = $row["uid"];
 $_SESSION["CREATED"] = time();
 
-
 $db->close();
+header("Location: mystack.php");
 
 ?>

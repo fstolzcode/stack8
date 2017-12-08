@@ -9,7 +9,7 @@
  */
 class CPU
 {
-    constructor(memory,alu,stack)
+    constructor(memory,alu,stack) //Internals
     {
         this.pc = 0;
         this.memory = memory;
@@ -19,28 +19,28 @@ class CPU
 
     step()
     {
-        var instruction = 0;
-        var opcode = 0;
+        var instruction = 0; //instruction data
+        var opcode = 0; //opcode
 
-        instruction = this.memory.fetch(this.pc);
+        instruction = this.memory.fetch(this.pc); //get first part of instruction
         instruction = instruction << 8;
         this.pc++;
-        instruction = instruction | this.memory.fetch(this.pc);
+        instruction = instruction | this.memory.fetch(this.pc); //get second part of instruction
         this.pc++;
-        opcode = instruction >> 13;
+        opcode = instruction >> 13; //get the opcode
         switch(opcode)
         {
-            case 0:
+            case 0: //push
                 this.internalStack.push(this.memory.fetch((instruction & 0x1FFF)));
                 break;
-            case 1:
+            case 1: //pop
                 this.memory.store((instruction & 0x1FFF),this.internalStack.pop());
                 break;
-            case 2:
+            case 2: //pushi
                 //console.log("Pushi");
                 var pointer = 0;
-                var memoryLocation = instruction & 0x1FFF;
-                pointer = pointer | this.memory.fetch(memoryLocation);
+                var memoryLocation = instruction & 0x1FFF; //get the memory location
+                pointer = pointer | this.memory.fetch(memoryLocation); //set the pointer
                 pointer = pointer << 8;
                 memoryLocation++;
                 pointer = pointer | this.memory.fetch(memoryLocation);
@@ -49,11 +49,11 @@ class CPU
                 this.internalStack.push(this.memory.fetch(pointer));
                 //this.internalStack.push(this.memory.fetch(this.memory.fetch(instruction & 0x1FFF)));
                 break;
-            case 3:
+            case 3: //popi
                 //console.log("Popi");
                 var pointer = 0;
-                var memoryLocation = instruction & 0x1FFF;
-                pointer = pointer | this.memory.fetch(memoryLocation);
+                var memoryLocation = instruction & 0x1FFF; //get the memory location
+                pointer = pointer | this.memory.fetch(memoryLocation); //set the pointer
                 pointer = pointer << 8;
                 memoryLocation++;
                 pointer = pointer | this.memory.fetch(memoryLocation);
@@ -62,20 +62,20 @@ class CPU
                 this.memory.store(pointer,this.internalStack.pop());
                 //this.internalStack.push(this.memory.fetch(this.memory.fetch(instruction & 0x1FFF)));
                 break;
-            case 4:
+            case 4: //add
                 this.internalALU.performOperation(1);
                 break;
-            case 5:
+            case 5: //nand
                 this.internalALU.performOperation(2);
                 break;
-            case 6:
+            case 6: //jmpule
                 this.internalALU.performOperation(3);
                 if(this.internalStack.pop() == 1)
                 {
                     this.pc = (instruction & 0x1FFF);
                 }
                 break;
-            case 7:
+            case 7: //jmple
                 this.internalALU.performOperation(4);
                 if(this.internalStack.pop() == 1)
                 {
@@ -87,11 +87,6 @@ class CPU
                 return;
         }
     }
-
-    run()
-    {
-        ;
-    }
 }
 
 /**
@@ -101,12 +96,13 @@ class ALU
 {
     constructor(stackObject)
     {
-        this.internalStack = stackObject; 
-        this.aluInReg1 = 0;
+        this.internalStack = stackObject;   //Stack of the machine
+        this.aluInReg1 = 0; //internal registers
         this.aluInReg2 = 0;
         this.aluOutReg = 0;
     }
 
+    //Basic arithmetic functions and jump
     performAdd(inval1,inval2)
     {
         return ((inval1 + inval2)%256);
@@ -115,18 +111,6 @@ class ALU
     performNand(inval1,inval2)
     {
         return ~(inval1 & inval2);
-    }
-
-    performLfsh(inval1,inval2)
-    {
-        var tempReg = inval1;
-        for(var i = 0; i < inval2; i++)
-        {
-            tempReg = tempReg << 1;
-            tempReg = tempReg | (tempReg >> 8);
-        }
-        tempReg = tempReg & 0xFFFF;
-        return tempReg;
     }
 
     performUCmp(inval1, inval2)
@@ -155,24 +139,25 @@ class ALU
         }
     }
 
+    //Wrapper for functions
     performOperation(opcode)
     {
         if(!(opcode > -1 && opcode < 8))
         {
             return;
         }
-        this.aluInReg1 = this.internalStack.pop();
+        this.aluInReg1 = this.internalStack.pop(); //Get the operands from the stack
         this.aluInReg2 = this.internalStack.pop();
 
         if(opcode == 1)
         {
             this.aluOutReg = this.performAdd(this.aluInReg1,this.aluInReg2);
-            this.internalStack.push(this.aluOutReg);
+            this.internalStack.push(this.aluOutReg); //push the result
         }
         if(opcode == 2)
         {
             this.aluOutReg = this.performNand(this.aluInReg1,this.aluInReg2);
-            this.internalStack.push(this.aluOutReg);
+            this.internalStack.push(this.aluOutReg);//push the result
         }
         if(opcode == 3)
         {
@@ -181,12 +166,12 @@ class ALU
             this.internalStack.push(this.aluOutReg);
             */
             this.aluOutReg = this.performUCmp(this.aluInReg1,this.aluInReg2);
-            this.internalStack.push(this.aluOutReg);
+            this.internalStack.push(this.aluOutReg);//push the result
         }
         if(opcode == 4)
         {
             this.aluOutReg = this.performCmp(this.aluInReg1,this.aluInReg2);
-            this.internalStack.push(this.aluOutReg);
+            this.internalStack.push(this.aluOutReg);//push the result
         }
     }
 }
@@ -198,14 +183,16 @@ class Memory
 {
     constructor()
     {
-        this.memArr = new Uint8Array(8192);
+        this.memArr = new Uint8Array(8192); //Internal memory
     }
 
+    //get byte from memory
     fetch(address)
     {
         return this.memArr[address];
     }
 
+    //set byte at address
     store(address, value)
     {
         this.memArr[address] = value;
@@ -219,10 +206,11 @@ class Stack
 {
     constructor()
     {
-        this.stackObject = new Int8Array(8);
+        this.stackObject = new Int8Array(8); //internal array as stack
         this.currentLength = 0;
     }
 
+    //push an entry to the stack by copying and moving the array
     push(newEntry)
     {
         this.stackObject.copyWithin(1,0);
@@ -233,6 +221,7 @@ class Stack
         }
     }
 
+    //pop an entry, by getting first entry and then moving the array one element to the left, also zero out everything
     pop()
     {
         if(this.currentLength == 0) return 0;

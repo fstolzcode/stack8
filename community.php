@@ -13,31 +13,33 @@
   <div class="collapse navbar-collapse" id="navbarNav">
     <ul class="navbar-nav">
       <li class="nav-item">
-        <a class="nav-link" href="style.html">Home</a>
+        <a class="nav-link" href="index.php">Home</a>
       </li>
       <li class="nav-item">
-        <a class="nav-link disabled" href="#">Manual</a>
+        <a class="nav-link" href="howto.php">Manual</a>
       </li>
       <li class="nav-item active">
         <a class="nav-link" href="#">Shared Programs</a>
       </li>
       <li class="nav-item">
-        <a class="nav-link disabled" href="#">My Stack</a>
+        <a class="nav-link" href="mystack.php">My Stack</a>
       </li>
     </ul>
   </div>
 </nav>
 
 <div class="container">
-	<div class="row">
-	<br>
-	</div>
-	<div class="row">
+	<div class="row p-2">
+		<div class="col">
+		<div class="card">
+		<h3 class="card-header text-center">Shared Programs</h3>
+		<div class="card-block">
 		<div class="col">
 		<ul class="list-group">
 		<?php
+		//DB data, pull all entries in the database
 		$dbserver = "localhost";
-		$dbuser = "xxxx";
+		$dbuser = "stackUser";
 		$dbpassword = "xxxx";
 		$dbname = "stack8";
 
@@ -50,16 +52,37 @@
         	exit(-1);
 		}
 
-		$list = $db->query("SELECT pname,phash,public FROM Programs");
-
-		if($list->num_rows > 0 )
+		$programlist = $db->query("SELECT uid,pname,phash,public FROM Programs");
+		$userlist = $db->query("SELECT uid, uname FROM Users");
+		$users = [];
+		if($userlist->num_rows > 0)
 		{
-        	while($row = $list->fetch_assoc())
+			while($row = $userlist->fetch_assoc())
+			{
+				$users[$row["uid"]] = $row["uname"];
+			}
+		}
+		//var_dump($users);
+		
+		if($programlist->num_rows > 0 )
+		{
+        	while($row = $programlist->fetch_assoc())
         	{
 				if(intval($row["public"],10) === 1)
 				{
-                	echo "<a href=\"style.html?phash=".$row["phash"]."\" class=\"list-group-item list-group-item-action text-center d-inline-block \">".$row["pname"]."</a>";
-        		}
+                	echo "<a href=\"index.php?phash=".$row["phash"]."\" class=\"list-group-item list-group-item-action flex-column align-items-start text-center d-inline-block \">".$row["pname"];
+					echo "<div class=\"w-100 justify-content-between\">";
+					if(is_null($users[$row["uid"]]))
+					{
+						echo "<small><i>by anonymous</i></small>";
+					}
+					else
+					{
+						echo "<small><i>by ".$users[$row["uid"]]."</i></small>";
+					}
+					echo "</div>";
+					echo "</a>";
+				}
 			}
 		}
 
@@ -67,6 +90,9 @@
 		?>
 
 		</ul>
+		</div>
+		</div>
+		</div>
 		</div>
 	</div>
 </div>

@@ -1,4 +1,5 @@
 <?php
+//Session handler
 session_start();
 $isLoggedIn = false;
 if(isset($_SESSION["uid"]) && isset($_SESSION["CREATED"]))
@@ -35,10 +36,10 @@ if(!$isLoggedIn)
   <div class="collapse navbar-collapse" id="navbarNav">
     <ul class="navbar-nav">
       <li class="nav-item">
-        <a class="nav-link" href="style.html">Home</a>
+        <a class="nav-link" href="index.php">Home</a>
       </li>
       <li class="nav-item">
-        <a class="nav-link disabled" href="#">Manual</a>
+        <a class="nav-link" href="howto.php">Manual</a>
       </li>
       <li class="nav-item">
         <a class="nav-link" href="community.php">Shared Programs</a>
@@ -60,16 +61,17 @@ if(!$isLoggedIn)
 		</div>
 	</div>
 	
-	<div class="row p-2 justify-content-center" >
+	<div class="d-flex flew-row p-2 justify-content-center" >
         <div class="col-sm-6">
         	<div class="card">
   			<h3 class="card-header text-center">Your public programs</h3>
-  			<div class="card-block">
+  			<div class="card-block" style="max-height:300px;overflow:auto;">
   			
 			<ul class="list-group">
         	<?php
+            //DB data,
         	$dbserver = "localhost";
-        	$dbuser = "xxxx";
+        	$dbuser = "stackUser";
         	$dbpassword = "xxxx";
         	$dbname = "stack8";
 
@@ -82,6 +84,7 @@ if(!$isLoggedIn)
             	die();
         	}
 
+            //get all public programs, print list
         	$list = $db->query("SELECT pname,phash,public FROM Programs WHERE uid=".$_SESSION["uid"]);
 
         	if($list->num_rows > 0 )
@@ -90,7 +93,7 @@ if(!$isLoggedIn)
             	{
                 	if(intval($row["public"],10) === 1)
                 	{
-                    	echo "<a href=\"style.html?phash=".$row["phash"]."\" class=\"list-group-item list-group-item-action text-center d-inline-block \">".$row["pname"]."</a>";
+                    	echo "<a href=\"index.php?phash=".$row["phash"]."\" class=\"list-group-item list-group-item-action text-center d-inline-block \">".$row["pname"]."</a>";
                 	}
             	}
         	}
@@ -111,8 +114,9 @@ if(!$isLoggedIn)
 
 			<ul class="list-group">
             <?php
+            //DB data
             $dbserver = "localhost";
-            $dbuser = "xxxx";
+            $dbuser = "stackUser";
             $dbpassword = "xxxx";
             $dbname = "stack8";
 
@@ -125,6 +129,7 @@ if(!$isLoggedIn)
                 die();
             }
 
+            //get all private programs, print list
             $list = $db->query("SELECT pname,phash,public FROM Programs WHERE uid=".$_SESSION["uid"]);
 
             if($list->num_rows > 0 )
@@ -133,7 +138,7 @@ if(!$isLoggedIn)
                 {
                     if(intval($row["public"],10) === 0)
                     {
-                        echo "<a href=\"style.html?phash=".$row["phash"]."\" class=\"list-group-item list-group-item-action text-center d-inline-block \">".$row["pname"]."</a>";
+                        echo "<a href=\"index.php?phash=".$row["phash"]."\" class=\"list-group-item list-group-item-action text-center d-inline-block \">".$row["pname"]."</a>";
                     }
                 }
             }
@@ -147,6 +152,17 @@ if(!$isLoggedIn)
             </div>
 		</div>
     </div>
+	
+	 <div class="d-flex flex-row p-2 justify-content-center">
+        <div class="card">
+        <div class="card-block text-center">
+            <form action="logout.php">
+			 <button type="submit" class="btn btn-danger">Logout</button>
+			</form>
+        </div>
+        </div>
+    </div>
+
 
 </div>
 

@@ -2,8 +2,8 @@
 die();
 //Inactive script
 $dbserver = "localhost";
-$dbuser = "xxxx";
-$dbpassword = "xxxx";
+$dbuser = "stackUser";
+$dbpassword = "xxxxx";
 $dbname = "stack8";
 
 // Create connection

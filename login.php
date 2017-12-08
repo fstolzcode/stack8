@@ -10,7 +10,7 @@ if(isset($_SESSION["uid"]) && isset($_SESSION["CREATED"]))
     }
     else
     {
-        echo "Already logged in";
+		header("Location: mystack.php");
         die();
     }
 }
@@ -30,16 +30,16 @@ if(isset($_SESSION["uid"]) && isset($_SESSION["CREATED"]))
   <div class="collapse navbar-collapse" id="navbarNav">
     <ul class="navbar-nav">
       <li class="nav-item">
-        <a class="nav-link" href="style.html">Home</a>
+        <a class="nav-link" href="index.php">Home</a>
       </li>
       <li class="nav-item">
-        <a class="nav-link disabled" href="#">Manual</a>
+        <a class="nav-link" href="howto.php">Manual</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="community.php">Shared Programs</a>
       </li>
       <li class="nav-item active">
-        <a class="nav-link" href="#">Shared Programs</a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link disabled" href="#">My Stack</a>
+        <a class="nav-link" href="#">My Stack</a>
       </li>
     </ul>
   </div>
